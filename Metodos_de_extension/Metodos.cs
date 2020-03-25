@@ -14,7 +14,7 @@ using System.Reflection;
 namespace Metodos_de_extension
 {
     //Crear delegado para el manejo de las exceptions
-    public delegate void ExceptionEventHandler(object sender, ExceptionEvenArgs e);
+    public delegate void ExceptionEventHandler(object sender, ExceptionEvenArgs ex);
     public static class Metodos
     {
         public static event ExceptionEventHandler Excepcion;
