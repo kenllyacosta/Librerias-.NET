@@ -9,11 +9,16 @@ using System.Text;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Reflection;
 
 namespace Metodos_de_extension
 {
+    //Crear delegado para el manejo de las exceptions
+    public delegate void ExceptionEventHandler(object sender, ExceptionEvenArgs e);
     public static class Metodos
     {
+        public static event ExceptionEventHandler Excepcion;
+
         /// <summary>
         /// Retorna todo el string consultado
         /// </summary>
@@ -51,6 +56,7 @@ namespace Metodos_de_extension
                             EventLog.WriteEntry("ConsultaApi", ex.InnerException.InnerException.InnerException.Message, EventLogEntryType.Error);
                     }
                 }
+                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { InnerException = ex.InnerException, Message = ex.Message, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
                 return resultado;
             }
 
@@ -95,6 +101,7 @@ namespace Metodos_de_extension
                             EventLog.WriteEntry("ConsultaApi", ex.InnerException.InnerException.InnerException.Message, EventLogEntryType.Error);
                     }
                 }
+                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { InnerException = ex.InnerException, Message = ex.Message, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
                 return resultado;
             }
 
@@ -205,6 +212,7 @@ namespace Metodos_de_extension
                             EventLog.WriteEntry("EnvioDeCorreo", ex.InnerException.InnerException.InnerException.Message, EventLogEntryType.Error);
                     }
                 }
+                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { InnerException = ex.InnerException, Message = ex.Message, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
                 return false;
             }
         }
@@ -446,5 +454,14 @@ namespace Metodos_de_extension
         {
             return stringToCenter.PadLeft(((totalLength - stringToCenter.Length) / 2) + stringToCenter.Length).PadRight(totalLength);
         }
+    }
+
+    public class ExceptionEvenArgs : EventArgs
+    {
+        public string Message { get; set; }
+        public string Source { get; set; }
+        public string StackTrace { get; set; }
+        public MethodBase TargetSite { get; set; }
+        public Exception InnerException { get; set; }        
     }
 }
