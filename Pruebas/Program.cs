@@ -22,8 +22,8 @@ namespace Pruebas
         /// </param>
         private static void MetodosDeExtension(string[] args)
         {
-            //var datos = args.ConsultaApi("https://ticapacitacion.com/cats");
-            //var datosDeGatos = args.ConsultaApi<List<Cat>>("https://ticapacitacion.com/cats");
+            var datos = args.ConsultaApi("https://ticapacitacion.com/cats");
+            var datosDeGatos = args.ConsultaApi<List<Cat>>("https://ticapacitacion.com/cats");
 
             List<MailAddress> correosDestino = new List<MailAddress>
             {
