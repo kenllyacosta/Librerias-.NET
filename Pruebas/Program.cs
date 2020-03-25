@@ -30,7 +30,7 @@ namespace Pruebas
                 new MailAddress("kenllyacosta@hotmail.com", "Kenlly Acosta Gmail"),
                 new MailAddress("kenllyacosta@gmail.com", "Kenlly Acosta Hotmail")
             };
-            args.EnvioDeCorreo(correosDestino, null, null, null, "tucorreo@gmail.com", "tuclave", "Correo de las librerías .NET - Kenlly Acosta", "Test", "Hola Mundo en texto plano y <b>Hola Mundo en HTML</b>", true, MailPriority.High);
+            args.EnvioDeCorreo(correosDestino, null, null, null, "tucorreo@gmail.com", "tuclave", "Correo desde las librerías .NET - Kenlly Acosta", "Test", "Hola Mundo en texto plano y <b>Hola Mundo en HTML</b>", true, MailPriority.High);
         }
     }
 
