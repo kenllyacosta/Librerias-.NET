@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Mail;
 using Metodos_de_extension;
 
 namespace Pruebas
@@ -21,8 +22,15 @@ namespace Pruebas
         /// </param>
         private static void MetodosDeExtension(string[] args)
         {
-            var datos = args.ConsultaApi("https://ticapacitacion.com/cats");
-            var datosDeGatos = args.ConsultaApi<List<Cat>>("https://ticapacitacion.com/cats");
+            //var datos = args.ConsultaApi("https://ticapacitacion.com/cats");
+            //var datosDeGatos = args.ConsultaApi<List<Cat>>("https://ticapacitacion.com/cats");
+
+            List<MailAddress> correosDestino = new List<MailAddress>
+            {
+                new MailAddress("kenllyacosta@hotmail.com", "Kenlly Acosta Gmail"),
+                new MailAddress("kenllyacosta@gmail.com", "Kenlly Acosta Hotmail")
+            };
+            args.EnvioDeCorreo(correosDestino, null, null, null, "tucorreo@gmail.com", "tuclave", "Correo de las librerías .NET - Kenlly Acosta", "Test", "Hola Mundo en texto plano y <b>Hola Mundo en HTML</b>", true, MailPriority.High);
         }
     }
 
