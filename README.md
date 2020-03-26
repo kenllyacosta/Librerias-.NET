@@ -37,7 +37,7 @@ Consiste en un proyecto de consola y librerias de clase del .net Standard, en el
 <a href="https://github.com/kenllyacosta/Librerias-.NET/blob/master/Metodos_de_extension/Metodos.cs">Listado de métodos agregados</><p/>
 
 <h3>RepositorioEF</h3>
-<p>Consiste en un proyecto de libreria de clases del .Net Framwork para acceder a cualquier fuente de datos usando EntityFramwork o T-SQL</p>
+<p>Consiste en un proyecto de libreria de clases del .Net Framework para acceder a cualquier fuente de datos usando EntityFramwork o T-SQL</p>
 <p>Métodos de Repositorio&lt;TEntity&gt;</p>
 <ul>
   <li><b>Create:</b> Este método crea un registro nuevo en la tabla.</li>
@@ -54,5 +54,5 @@ Consiste en un proyecto de consola y librerias de clase del .net Standard, en el
   <li><b>GetProviderFactoryClasses:</b> Este método obtiene todos los proveedores instalados.</li>
   <li><b>GetConnectionStringByProvider:</b> Este método obtiene la cadena de conexión por cada proveedor de datos.</li>
 </ul>
-<em>Nota: todos poseen un evento Exception que notifica en caso haya pasado algún error en el componente.</em>
+<em>Nota: todos poseen un evento <b>Exception</b> que notifica en caso haya pasado algún error en el componente.</em><br/><br/>
 <a href="https://github.com/kenllyacosta/Librerias-.NET/blob/master/RepositorioEF/Repositorio.cs">Listado de métodos agregados</><p/>
