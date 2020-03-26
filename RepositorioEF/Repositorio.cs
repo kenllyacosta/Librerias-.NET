@@ -29,7 +29,7 @@ namespace RepositorioEF
         int Save();
     }
 
-    //Crear delegado para el manejo de las exceptions
+    //Crear delegado para el manejo de las excepciones
     public delegate void ExceptionEventHandler(object sender, ExceptionEvenArgs e);
 
     public class Repositorio : IRepositorio
