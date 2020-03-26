@@ -10,7 +10,6 @@ namespace Pruebas
         static void Main(string[] args)
         {
             MetodosDeExtension(args);
-            Console.WriteLine("Hola mundo!");
             Console.ReadLine();
         }
 
@@ -43,6 +42,11 @@ namespace Pruebas
             Metodos.Excepcion -= Metodos_Excepcion;
         }
 
+        /// <summary>
+        /// Este código se ejecuta si sucede una exepción en el componente externo
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="ex"></param>
         private static void Metodos_Excepcion(object sender, ExceptionEvenArgs ex)
         {
             Console.WriteLine(ex.Message);
