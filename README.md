@@ -41,9 +41,10 @@ Consiste en un proyecto de consola y librerias de clase del .net Standard, en el
 <p>Métodos de Repositorio&lt;TEntity&gt;</p>
 <ul>
   <li><b>Create:</b> Este método crea un registro nuevo en la tabla.</li>
-  <li><b>Retrieve:</b> Este método retorna un listado de registros desde la tabla.</li>
+  <li><b>Retrieve:</b> Este método retorna un registro desde la tabla.</li>  
   <li><b>Update:</b> Este actualiza el registro en la tabla.</li>
   <li><b>Delete:</b> Este método elimina un registro de la tabla.</li>
+  <li><b>Filter:</b> Este método retorna un listado de registros desde la tabla.</li>
 </ul>
 <p>Métodos de Repositorio</p>
 <ul>
@@ -61,7 +62,8 @@ Consiste en un proyecto de consola y librerias de clase del .net Standard, en el
 <p>Métodos de Repositorio&lt;TEntity&gt;</p>
 <ul>
   <li><b>Create:</b> Este método crea un registro nuevo en la tabla.</li>
-  <li><b>Retrieve:</b> Este método retorna un listado de registros desde la tabla.</li>
+  <li><b>Retrieve:</b> Este método retorna un registro desde la tabla.</li>
   <li><b>Update:</b> Este actualiza el registro en la tabla.</li>
   <li><b>Delete:</b> Este método elimina un registro de la tabla.</li>
+  <li><b>Filter:</b> Este método retorna un listado de registros desde la tabla.</li>
 </ul>
