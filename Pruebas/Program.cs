@@ -10,7 +10,7 @@ namespace Pruebas
     {
         static void Main(string[] args)
         {
-            PruebasRepositorioEFCore();
+            Console.WriteLine("Hola Mundo!");
             Console.ReadLine();
         }
 
