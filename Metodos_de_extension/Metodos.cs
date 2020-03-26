@@ -579,6 +579,12 @@ namespace Metodos_de_extension
             return resultado;
         }
 
+        /// <summary>
+        /// Convierte números a letras
+        /// </summary>
+        /// <param name="valor"></param>
+        /// <param name="numero"></param>
+        /// <returns></returns>
         public static string Numaletra(this object valor, string numero)
         {
             return Numalet.ToString(numero);
