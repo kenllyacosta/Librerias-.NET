@@ -56,3 +56,12 @@ Consiste en un proyecto de consola y librerias de clase del .net Standard, en el
 </ul>
 <em>Nota: todos poseen un evento <b>Exception</b> que notifica en caso haya pasado algún error en el componente.</em><br/><br/>
 <a href="https://github.com/kenllyacosta/Librerias-.NET/blob/master/RepositorioEF/Repositorio.cs">Listado de métodos agregados</><p/>
+<h3>RepositorioEFCore</h3>
+<p>Consiste en un proyecto de libreria de clases del .Net Standard para acceder a cualquier fuente de datos usando EntityFramwork Core</p>
+<p>Métodos de Repositorio&lt;TEntity&gt;</p>
+<ul>
+  <li><b>Create:</b> Este método crea un registro nuevo en la tabla.</li>
+  <li><b>Retrieve:</b> Este método retorna un listado de registros desde la tabla.</li>
+  <li><b>Update:</b> Este actualiza el registro en la tabla.</li>
+  <li><b>Delete:</b> Este método elimina un registro de la tabla.</li>
+</ul>
