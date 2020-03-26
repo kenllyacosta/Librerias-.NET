@@ -14,26 +14,32 @@ using System.Reflection;
 
 namespace RepositorioEF
 {
-    internal interface IRepositorio<TEntity> : IDisposable where TEntity : class
+    internal interface IRepositorio : IDisposable
     {
         //Operaciones que expondrá la interface
-        TEntity Create(TEntity toCreate);
-        TEntity Retrieve(Expression<Func<TEntity, bool>> criterio);
-        bool Update(TEntity toUpdate);
-        bool Delete(TEntity toDelete);
-        List<TEntity> Filter(Expression<Func<TEntity, bool>> criterio, bool asNoTrack);
+        TEntity Create<TEntity>(TEntity toCreate) where TEntity : class;
+        TEntity Retrieve<TEntity>(Expression<Func<TEntity, bool>> criterio) where TEntity : class;
+        bool Update<TEntity>(TEntity toUpdate) where TEntity : class;
+        bool Delete<TEntity>(TEntity toDelete) where TEntity : class;
+        List<TEntity> Filter<TEntity>(Expression<Func<TEntity, bool>> criterio, bool asNoTrack) where TEntity : class;
+    }
+
+    internal interface IUnitOfWork : IRepositorio
+    {        
+        int Save();
     }
 
     //Crear delegado para el manejo de las exceptions
     public delegate void ExceptionEventHandler(object sender, ExceptionEvenArgs e);
 
-    public class Repositorio<TEntity> : IRepositorio<TEntity> where TEntity : class
+    public class Repositorio : IRepositorio
     {
         /// <summary>
         /// Evento para manejo de las excepciones lanzadas desde el repositorio genérico
         /// </summary>
-        public event ExceptionEventHandler Excepcion;
-        DbContext Contexto = null;
+        public static event ExceptionEventHandler Excepcion;
+        readonly DbContext Contexto = null;
+        readonly bool IsUnitOfWork = false;
 
         /// <summary>
         /// Repositorio genérico con las operaciones básicas
@@ -47,22 +53,21 @@ namespace RepositorioEF
         /// <param name="proxyCreationEnabled">
         /// Obtiene o establece un valor que indica si el marco creará o no instancias de clases proxy generadas dinámicamente siempre que cree una instancia de un tipo de entidad.Tenga en cuenta que incluso si la creación de proxy está habilitada con este indicador, las instancias de proxy solo se crearán para los tipos de entidad que cumplan con los requisitos para ser procesados.La creación de proxy está habilitada por defecto.
         /// </param>
-        public Repositorio(DbContext contexto, bool lazyLoadingEnabled = false, bool proxyCreationEnabled = false)
+        public Repositorio(DbContext contexto, bool isUnitOfWork, bool lazyLoadingEnabled = false, bool proxyCreationEnabled = false)
         {
             this.Contexto = contexto;
             Contexto.Configuration.LazyLoadingEnabled = lazyLoadingEnabled;
             Contexto.Configuration.ProxyCreationEnabled = proxyCreationEnabled;
+            this.IsUnitOfWork = isUnitOfWork;
         }
 
-        private DbSet<TEntity> EntitySet { get { return Contexto.Set<TEntity>(); } }
-
-        public TEntity Create(TEntity toCreate)
+        public TEntity Create<TEntity>(TEntity toCreate) where TEntity : class
         {
             TEntity Result = null;
             try
             {
-                Result = EntitySet.Add(toCreate);
-                Contexto.SaveChanges();
+                Result = Contexto.Set<TEntity>().Add(toCreate);
+                Save();
             }
             catch (DbEntityValidationException ex)
             {
@@ -75,13 +80,13 @@ namespace RepositorioEF
             return Result;
         }
 
-        public IEnumerable<TEntity> Create(IEnumerable<TEntity> toCreate)
+        public IEnumerable<TEntity> Create<TEntity>(IEnumerable<TEntity> toCreate) where TEntity : class
         {
             IEnumerable<TEntity> Result = null;
             try
             {
-                Result = EntitySet.AddRange(toCreate);
-                Contexto.SaveChanges();
+                Result = Contexto.Set<TEntity>().AddRange(toCreate);
+                Save();
             }
             catch (DbEntityValidationException ex)
             {
@@ -94,14 +99,14 @@ namespace RepositorioEF
             return Result;
         }
 
-        public bool Delete(TEntity toDelete)
+        public bool Delete<TEntity>(TEntity toDelete) where TEntity : class
         {
             bool Result = false;
             try
             {
-                EntitySet.Attach(toDelete);
-                EntitySet.Remove(toDelete);
-                Result = Contexto.SaveChanges() > 0;
+                Contexto.Set<TEntity>().Attach(toDelete);
+                Contexto.Set<TEntity>().Remove(toDelete);
+                Result = Save() > 0;
             }
             catch (DbEntityValidationException ex)
             {
@@ -114,14 +119,14 @@ namespace RepositorioEF
             return Result;
         }
 
-        public bool Delete(IEnumerable<TEntity> toDelete)
+        public bool Delete<TEntity>(IEnumerable<TEntity> toDelete) where TEntity : class
         {
             bool Result = false;
 
             try
             {
-                EntitySet.RemoveRange(toDelete);
-                Result = Contexto.SaveChanges() > 0;
+                Contexto.Set<TEntity>().RemoveRange(toDelete);
+                Result = Save() > 0;
 
             }
             catch (DbEntityValidationException ex)
@@ -135,14 +140,14 @@ namespace RepositorioEF
             return Result;
         }
 
-        public bool Update(TEntity toUpdate)
+        public bool Update<TEntity>(TEntity toUpdate) where TEntity : class
         {
             bool Result = false;
             try
             {
-                EntitySet.Attach(toUpdate);
+                Contexto.Set<TEntity>().Attach(toUpdate);
                 Contexto.Entry<TEntity>(toUpdate).State = EntityState.Modified;
-                Result = Contexto.SaveChanges() > 0;
+                Result = Save() > 0;
             }
             catch (DbEntityValidationException ex)
             {
@@ -155,13 +160,13 @@ namespace RepositorioEF
             return Result;
         }
 
-        public bool Update(Expression<Func<TEntity, bool>> criterio, string propertyName, object valor)
+        public bool Update<TEntity>(Expression<Func<TEntity, bool>> criterio, string propertyName, object valor) where TEntity : class
         {
             bool Result = false;
             try
             {
-                Contexto.Entry<TEntity>(EntitySet.FirstOrDefault(criterio)).Property(propertyName).CurrentValue = valor;
-                Result = Contexto.SaveChanges() > 0;
+                Contexto.Entry<TEntity>(Contexto.Set<TEntity>().FirstOrDefault(criterio)).Property(propertyName).CurrentValue = valor;
+                Result = Save() > 0;
             }
             catch (DbEntityValidationException ex)
             {
@@ -174,12 +179,12 @@ namespace RepositorioEF
             return Result;
         }
 
-        public TEntity Retrieve(Expression<Func<TEntity, bool>> criterio)
+        public TEntity Retrieve<TEntity>(Expression<Func<TEntity, bool>> criterio) where TEntity : class
         {
             TEntity Result = null;
             try
             {
-                Result = EntitySet.FirstOrDefault(criterio);
+                Result = Contexto.Set<TEntity>().FirstOrDefault(criterio);
             }
             catch (DbEntityValidationException ex)
             {
@@ -192,12 +197,12 @@ namespace RepositorioEF
             return Result;
         }
 
-        public TEntity Retrieve(Expression<Func<TEntity, bool>> criterio, string include1)
+        public TEntity Retrieve<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1) where TEntity : class
         {
             TEntity Result = null;
             try
             {
-                Result = EntitySet.Include(include1).FirstOrDefault(criterio);
+                Result = Contexto.Set<TEntity>().Include(include1).FirstOrDefault(criterio);
             }
             catch (DbEntityValidationException ex)
             {
@@ -210,12 +215,12 @@ namespace RepositorioEF
             return Result;
         }
 
-        public TEntity Retrieve(Expression<Func<TEntity, bool>> criterio, string include1, string include2)
+        public TEntity Retrieve<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2) where TEntity : class
         {
             TEntity Result = null;
             try
             {
-                Result = EntitySet.Include(include1).Include(include2).FirstOrDefault(criterio);
+                Result = Contexto.Set<TEntity>().Include(include1).Include(include2).FirstOrDefault(criterio);
             }
             catch (DbEntityValidationException ex)
             {
@@ -228,12 +233,12 @@ namespace RepositorioEF
             return Result;
         }
 
-        public TEntity Retrieve(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3)
+        public TEntity Retrieve<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3) where TEntity : class
         {
             TEntity Result = null;
             try
             {
-                Result = EntitySet.Include(include1).Include(include2).Include(include3).FirstOrDefault(criterio);
+                Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).FirstOrDefault(criterio);
             }
             catch (DbEntityValidationException ex)
             {
@@ -246,12 +251,12 @@ namespace RepositorioEF
             return Result;
         }
 
-        public TEntity Retrieve(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4)
+        public TEntity Retrieve<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4) where TEntity : class
         {
             TEntity Result = null;
             try
             {
-                Result = EntitySet.Include(include1).Include(include2).Include(include3).Include(include4).FirstOrDefault(criterio);
+                Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).FirstOrDefault(criterio);
             }
             catch (DbEntityValidationException ex)
             {
@@ -264,12 +269,12 @@ namespace RepositorioEF
             return Result;
         }
 
-        public TEntity Retrieve(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5)
+        public TEntity Retrieve<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5) where TEntity : class
         {
             TEntity Result = null;
             try
             {
-                Result = EntitySet.Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).FirstOrDefault(criterio);
+                Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).FirstOrDefault(criterio);
             }
             catch (DbEntityValidationException ex)
             {
@@ -282,12 +287,12 @@ namespace RepositorioEF
             return Result;
         }
 
-        public TEntity Retrieve(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6)
+        public TEntity Retrieve<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6) where TEntity : class
         {
             TEntity Result = null;
             try
             {
-                Result = EntitySet.Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).FirstOrDefault(criterio);
+                Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).FirstOrDefault(criterio);
             }
             catch (DbEntityValidationException ex)
             {
@@ -300,12 +305,12 @@ namespace RepositorioEF
             return Result;
         }
 
-        public TEntity Retrieve(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7)
+        public TEntity Retrieve<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7) where TEntity : class
         {
             TEntity Result = null;
             try
             {
-                Result = EntitySet.Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).FirstOrDefault(criterio);
+                Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).FirstOrDefault(criterio);
             }
             catch (DbEntityValidationException ex)
             {
@@ -318,12 +323,12 @@ namespace RepositorioEF
             return Result;
         }
 
-        public TEntity Retrieve(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7, string include8)
+        public TEntity Retrieve<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7, string include8) where TEntity : class
         {
             TEntity Result = null;
             try
             {
-                Result = EntitySet.Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).FirstOrDefault(criterio);
+                Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).FirstOrDefault(criterio);
             }
             catch (DbEntityValidationException ex)
             {
@@ -336,12 +341,12 @@ namespace RepositorioEF
             return Result;
         }
 
-        public TEntity Retrieve(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7, string include8, string include9)
+        public TEntity Retrieve<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7, string include8, string include9) where TEntity : class
         {
             TEntity Result = null;
             try
             {
-                Result = EntitySet.Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Include(include9).FirstOrDefault(criterio);
+                Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Include(include9).FirstOrDefault(criterio);
             }
             catch (DbEntityValidationException ex)
             {
@@ -354,12 +359,12 @@ namespace RepositorioEF
             return Result;
         }
 
-        public TEntity Retrieve(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7, string include8, string include9, string include10)
+        public TEntity Retrieve<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7, string include8, string include9, string include10) where TEntity : class
         {
             TEntity Result = null;
             try
             {
-                Result = EntitySet.Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Include(include9).Include(include10).FirstOrDefault(criterio);
+                Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Include(include9).Include(include10).FirstOrDefault(criterio);
             }
             catch (DbEntityValidationException ex)
             {
@@ -372,15 +377,15 @@ namespace RepositorioEF
             return Result;
         }
 
-        public List<TEntity> Filter(Expression<Func<TEntity, bool>> criterio, bool asNoTrack = false)
+        public List<TEntity> Filter<TEntity>(Expression<Func<TEntity, bool>> criterio, bool asNoTrack = false) where TEntity : class
         {
             List<TEntity> Result = null;
             try
             {
                 if (asNoTrack)
-                    Result = EntitySet.AsNoTracking().Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().AsNoTracking().Where(criterio).ToList();
                 else
-                    Result = EntitySet.Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().Where(criterio).ToList();
             }
             catch (DbEntityValidationException ex)
             {
@@ -393,15 +398,15 @@ namespace RepositorioEF
             return Result;
         }
 
-        public List<TEntity> Filter(Expression<Func<TEntity, bool>> criterio, string include1, bool asNoTrack = false)
+        public List<TEntity> Filter<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, bool asNoTrack = false) where TEntity : class
         {
             List<TEntity> Result = null;
             try
             {
                 if (asNoTrack)
-                    Result = EntitySet.AsNoTracking().Include(include1).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().AsNoTracking().Include(include1).Where(criterio).ToList();
                 else
-                    Result = EntitySet.Include(include1).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().Include(include1).Where(criterio).ToList();
             }
             catch (DbEntityValidationException ex)
             {
@@ -414,15 +419,15 @@ namespace RepositorioEF
             return Result;
         }
 
-        public List<TEntity> Filter(Expression<Func<TEntity, bool>> criterio, string include1, string include2, bool asNoTrack = false)
+        public List<TEntity> Filter<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, bool asNoTrack = false) where TEntity : class
         {
             List<TEntity> Result = null;
             try
             {
                 if (asNoTrack)
-                    Result = EntitySet.AsNoTracking().Include(include1).Include(include2).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().AsNoTracking().Include(include1).Include(include2).Where(criterio).ToList();
                 else
-                    Result = EntitySet.Include(include1).Include(include2).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Where(criterio).ToList();
             }
             catch (DbEntityValidationException ex)
             {
@@ -435,15 +440,15 @@ namespace RepositorioEF
             return Result;
         }
 
-        public List<TEntity> Filter(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, bool asNoTrack = false)
+        public List<TEntity> Filter<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, bool asNoTrack = false) where TEntity : class
         {
             List<TEntity> Result = null;
             try
             {
                 if (asNoTrack)
-                    Result = EntitySet.AsNoTracking().Include(include1).Include(include2).Include(include3).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().AsNoTracking().Include(include1).Include(include2).Include(include3).Where(criterio).ToList();
                 else
-                    Result = EntitySet.Include(include1).Include(include2).Include(include3).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Where(criterio).ToList();
             }
             catch (DbEntityValidationException ex)
             {
@@ -456,15 +461,15 @@ namespace RepositorioEF
             return Result;
         }
 
-        public List<TEntity> Filter(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, bool asNoTrack = false)
+        public List<TEntity> Filter<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, bool asNoTrack = false) where TEntity : class
         {
             List<TEntity> Result = null;
             try
             {
                 if (asNoTrack)
-                    Result = EntitySet.AsNoTracking().Include(include1).Include(include2).Include(include3).Include(include4).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().AsNoTracking().Include(include1).Include(include2).Include(include3).Include(include4).Where(criterio).ToList();
                 else
-                    Result = EntitySet.Include(include1).Include(include2).Include(include3).Include(include4).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Where(criterio).ToList();
             }
             catch (DbEntityValidationException ex)
             {
@@ -477,15 +482,15 @@ namespace RepositorioEF
             return Result;
         }
 
-        public List<TEntity> Filter(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, bool asNoTrack = false)
+        public List<TEntity> Filter<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, bool asNoTrack = false) where TEntity : class
         {
             List<TEntity> Result = null;
             try
             {
                 if (asNoTrack)
-                    Result = EntitySet.AsNoTracking().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().AsNoTracking().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Where(criterio).ToList();
                 else
-                    Result = EntitySet.Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Where(criterio).ToList();
             }
             catch (DbEntityValidationException ex)
             {
@@ -498,15 +503,15 @@ namespace RepositorioEF
             return Result;
         }
 
-        public List<TEntity> Filter(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, bool asNoTrack = false)
+        public List<TEntity> Filter<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, bool asNoTrack = false) where TEntity : class
         {
             List<TEntity> Result = null;
             try
             {
                 if (asNoTrack)
-                    Result = EntitySet.AsNoTracking().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().AsNoTracking().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Where(criterio).ToList();
                 else
-                    Result = EntitySet.Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Where(criterio).ToList();
             }
             catch (DbEntityValidationException ex)
             {
@@ -519,15 +524,15 @@ namespace RepositorioEF
             return Result;
         }
 
-        public List<TEntity> Filter(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7, bool asNoTrack = false)
+        public List<TEntity> Filter<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7, bool asNoTrack = false) where TEntity : class
         {
             List<TEntity> Result = null;
             try
             {
                 if (asNoTrack)
-                    Result = EntitySet.AsNoTracking().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().AsNoTracking().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Where(criterio).ToList();
                 else
-                    Result = EntitySet.Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Where(criterio).ToList();
             }
             catch (DbEntityValidationException ex)
             {
@@ -540,15 +545,15 @@ namespace RepositorioEF
             return Result;
         }
 
-        public List<TEntity> Filter(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7, string include8, bool asNoTrack = false)
+        public List<TEntity> Filter<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7, string include8, bool asNoTrack = false) where TEntity : class
         {
             List<TEntity> Result = null;
             try
             {
                 if (asNoTrack)
-                    Result = EntitySet.AsNoTracking().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().AsNoTracking().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Where(criterio).ToList();
                 else
-                    Result = EntitySet.Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Where(criterio).ToList();
             }
             catch (DbEntityValidationException ex)
             {
@@ -561,15 +566,15 @@ namespace RepositorioEF
             return Result;
         }
 
-        public List<TEntity> Filter(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7, string include8, string include9, bool asNoTrack = false)
+        public List<TEntity> Filter<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7, string include8, string include9, bool asNoTrack = false) where TEntity : class
         {
             List<TEntity> Result = null;
             try
             {
                 if (asNoTrack)
-                    Result = EntitySet.AsNoTracking().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Include(include9).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().AsNoTracking().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Include(include9).Where(criterio).ToList();
                 else
-                    Result = EntitySet.Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Include(include9).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Include(include9).Where(criterio).ToList();
             }
             catch (DbEntityValidationException ex)
             {
@@ -582,15 +587,15 @@ namespace RepositorioEF
             return Result;
         }
 
-        public List<TEntity> Filter(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7, string include8, string include9, string include10, bool asNoTrack = false)
+        public List<TEntity> Filter<TEntity>(Expression<Func<TEntity, bool>> criterio, string include1, string include2, string include3, string include4, string include5, string include6, string include7, string include8, string include9, string include10, bool asNoTrack = false) where TEntity : class
         {
             List<TEntity> Result = null;
             try
             {
                 if (asNoTrack)
-                    Result = EntitySet.AsNoTracking().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include10).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().AsNoTracking().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include10).Where(criterio).ToList();
                 else
-                    Result = EntitySet.Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Include(include9).Include(include10).Where(criterio).ToList();
+                    Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Include(include9).Include(include10).Where(criterio).ToList();
             }
             catch (DbEntityValidationException ex)
             {
@@ -603,30 +608,7 @@ namespace RepositorioEF
             return Result;
         }
 
-        public void Dispose()
-        {
-            if (Contexto != null)
-                Contexto.Dispose();
-        }
-    }
-
-    public class ExceptionEvenArgs : EventArgs
-    {
-        public string Message { get; set; }
-        public string Source { get; set; }
-        public string StackTrace { get; set; }
-        public MethodBase TargetSite { get; set; }
-        public Exception InnerException { get; set; }
-        public IEnumerable<DbEntityValidationResult> EntityValidationErrors { get; set; }
-    }
-
-    public class Repositorio
-    {
-        /// <summary>
-        /// Evento para manejo de las excepciones lanzadas desde el repositorio
-        /// </summary>
-        public static event ExceptionEventHandler Excepcion;
-
+        #region Manejo de T-SQL
         /// <summary>
         /// Método para realizar una consulta directa mediante T-SQL
         /// </summary>
@@ -911,6 +893,44 @@ namespace RepositorioEF
             }
             return returnValue;
         }
+        #endregion
+
+        public void Dispose()
+        {
+            if (Contexto != null)
+                Contexto.Dispose();
+        }
+
+        /// <summary>
+        /// Método que se debe usar solo cuando el contexto está como IsUnitOfWork = true
+        /// </summary>
+        /// <returns></returns>
+        public int SaveChanges()
+        {
+            return Contexto.SaveChanges();
+        }
+
+        /// <summary>
+        /// Método usado cuando el contexto está como IsUnitOfWork = false
+        /// </summary>
+        /// <returns></returns>
+        private int Save()
+        {
+            if (!IsUnitOfWork)
+                return Contexto.SaveChanges();
+            else
+                return 0;
+        }
+    }
+
+    public class ExceptionEvenArgs : EventArgs
+    {
+        public string Message { get; set; }
+        public string Source { get; set; }
+        public string StackTrace { get; set; }
+        public MethodBase TargetSite { get; set; }
+        public Exception InnerException { get; set; }
+        public IEnumerable<DbEntityValidationResult> EntityValidationErrors { get; set; }
     }
 
     public class SqlParametro
