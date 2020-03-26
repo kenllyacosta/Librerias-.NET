@@ -25,6 +25,11 @@ namespace Pruebas
             //Me inscribo al evento por si pasa alguna exepción en el componente "Métodos de Extensión"
             Metodos.Excepcion += Metodos_Excepcion;
 
+            Console.WriteLine(args.Numaletra(123456));
+            Console.WriteLine(args.Numaletra("123456"));
+
+            args.ValidarDocumento("001-1653664-1");            
+
             var datos = args.ConsultaApi("https://ticapacitacion.com/cats");
             var datosDeGatos = args.ConsultaApi<List<Cat>>("https://ticapacitacion.com/cats15151");//Disparará un exepción porque este enlace no existe
             List<MailAddress> correosDestino = new List<MailAddress>
