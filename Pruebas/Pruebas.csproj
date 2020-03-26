@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Metodos_de_extension\Metodos_de_extension.csproj" />
+    <ProjectReference Include="..\RepositorioEFCore\RepositorioEFCore.csproj" />
     <ProjectReference Include="..\RepositorioEF\RepositorioEF.csproj" />
   </ItemGroup>
 

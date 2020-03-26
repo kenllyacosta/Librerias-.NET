@@ -10,8 +10,36 @@ namespace Pruebas
     {
         static void Main(string[] args)
         {
-            PruebasRepositorioEF();
+            PruebasRepositorioEFCore();
             Console.ReadLine();
+        }
+
+        private static void PruebasRepositorioEFCore()
+        {
+            //Instalar el Entity Framework Core
+            //Aquí probamos nuestro repositorio enviandole cualquier contexto
+            DbContext contextoDePrueba = new DbContext("***Your ConectionString***");
+
+            //Podemos utilizarlo de las siguientes formas
+            //Uso 1
+            //RepositorioEF.Repositorio<TEntity> repositorio = new RepositorioEF.Repositorio<TEntity>(contextoDePrueba);
+            //repositorio.Create();
+            //repositorio.Retrieve();
+            //repositorio.Update();
+            //repositorio.Delete();
+            //repositorio.Filter();
+            //repositorio.Dispose();
+
+            //contextoDePrueba = new DbContext("***Your ConectionString***");
+            //Uso 2
+            //using (RepositorioEF.Repositorio<TEntity> repositorio = new RepositorioEF.Repositorio<TEntity>(contextoDePrueba))
+            //{
+            //    repositorio.Create();
+            //    repositorio.Retrieve();
+            //    repositorio.Update();
+            //    repositorio.Delete();
+            //    repositorio.Filter();
+            //}
         }
 
         private static void PruebasRepositorioEF()
