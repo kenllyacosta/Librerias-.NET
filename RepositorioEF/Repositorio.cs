@@ -1,11 +1,33 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Data.Common;
+using System.Data.Entity;
+using System.Data.Entity.Validation;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace RepositorioEF
 {
+    internal interface IRepositorio<TEntity> : IDisposable where TEntity : class
+    {
+        //Operaciones que expondrá la interface
+        TEntity Create(TEntity toCreate);
+        TEntity Retrieve(Expression<Func<TEntity, bool>> criterio);
+        bool Update(TEntity toUpdate);
+        bool Delete(TEntity toDelete);
+        List<TEntity> Filter(Expression<Func<TEntity, bool>> criterio, bool asNoTrack);
+    }
+
     //Crear delegado para el manejo de las exceptions
     public delegate void ExceptionEventHandler(object sender, ExceptionEvenArgs e);
 
-    public class Repositorio<TEntity>
+    public class Repositorio<TEntity> : IRepositorio<TEntity> where TEntity : class
     {
         /// <summary>
         /// Evento para manejo de las excepciones lanzadas desde el repositorio genérico
@@ -843,6 +865,18 @@ namespace RepositorioEF
             return result;
         }
 
+        //
+        // Summary:
+        //     Returns a System.Data.DataTable that contains information about all installed
+        //     providers that implement System.Data.Common.DbProviderFactory.
+        //
+        // Returns:
+        //     Returns a System.Data.DataTable containing System.Data.DataRow objects that contain
+        //     the following data. Column ordinalColumn nameDescription0 Name Human-readable
+        //     name for the data provider.1 Description Human-readable description of the data
+        //     provider.2 InvariantName Name that can be used programmatically to refer to the
+        //     data provider.3 AssemblyQualifiedName Fully qualified name of the factory class,
+        //     which contains enough information to instantiate the object.
         public static DataTable GetProviderFactoryClasses()
         {
             // Retrieve the installed providers and factories.

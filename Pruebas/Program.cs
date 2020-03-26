@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Net.Mail;
 using Metodos_de_extension;
 
@@ -9,8 +10,64 @@ namespace Pruebas
     {
         static void Main(string[] args)
         {
-            MetodosDeExtension(args);
+            PruebasRepositorioEF();
             Console.ReadLine();
+        }
+
+        private static void PruebasRepositorioEF()
+        {
+            //Proveedores
+            var proveedoresInstalados = RepositorioEF.Repositorio.GetProviderFactoryClasses();
+            for (int i = 0; i < proveedoresInstalados.Rows.Count; i++)
+            {
+                Console.WriteLine(proveedoresInstalados.Rows[i].ItemArray[0]);
+                Console.WriteLine(proveedoresInstalados.Rows[i].ItemArray[1]);
+                Console.WriteLine(proveedoresInstalados.Rows[i].ItemArray[2]);
+                Console.WriteLine(proveedoresInstalados.Rows[i].ItemArray[3]);
+            }
+
+            //Cadena de conexión por cada proveedor
+            Console.WriteLine(RepositorioEF.Repositorio.GetConnectionStringByProvider("System.Data.SqlClient"));
+            Console.WriteLine(RepositorioEF.Repositorio.GetConnectionStringByProvider("System.Data.OracleClient"));
+            Console.WriteLine(RepositorioEF.Repositorio.GetConnectionStringByProvider("System.Data.Odbc"));
+            Console.WriteLine(RepositorioEF.Repositorio.GetConnectionStringByProvider("System.Data.OleDb"));
+            Console.WriteLine(RepositorioEF.Repositorio.GetConnectionStringByProvider("System.Data.SqlServerCe.4.0"));
+            Console.WriteLine(RepositorioEF.Repositorio.GetConnectionStringByProvider("MySql.Data.MySqlClient"));
+
+            //Consulta con T-SQL
+            var datosSQL = RepositorioEF.Repositorio.QuerySQL("Select * From NombreTabla", "***Your ConectionString***");
+            var datosMySQL = RepositorioEF.Repositorio.QueryMySQL("Select * From NombreTabla", "***Your ConectionString***");
+            var datosSQLDataCommon = RepositorioEF.Repositorio.QueryCommonSQL("Select * From NombreTabla", "***Your ConectionString***", "System.Data.SqlClient");
+
+            //En todos los caso de consulta mediante T-SQL podemos convertir los datos retornados al tipo correspondiente usando
+            //TEntity datosConSutipoSQL = RepositorioEF.Repositorio.MakeEntityFromDataTable<TEntity>(datosSQL);
+            //TEntity datosConSutipoMySQL = RepositorioEF.Repositorio.MakeEntityFromDataTable<TEntity>(datosMySQL);
+            //TEntity datosConSutipoSQLDataCommon = RepositorioEF.Repositorio.MakeEntityFromDataTable<TEntity>(datosSQLDataCommon);
+
+            //Instalar el Entity Framework 6.x o posterior
+            //Aquí probamos nuestro repositorio enviandole cualquier contexto
+            DbContext contextoDePrueba = new DbContext("***Your ConectionString***");
+
+            //Podemos utilizarlo de las siguientes formas
+            //Uso 1
+            //RepositorioEF.Repositorio<TEntity> repositorio = new RepositorioEF.Repositorio<TEntity>(contextoDePrueba);            
+            //repositorio.Create();
+            //repositorio.Retrieve();
+            //repositorio.Update();
+            //repositorio.Delete();
+            //repositorio.Filter();
+            //repositorio.Dispose();
+
+            //contextoDePrueba = new DbContext("***Your ConectionString***");
+            //Uso 2
+            //using (RepositorioEF.Repositorio<TEntity> repositorio = new RepositorioEF.Repositorio<TEntity>(contextoDePrueba))
+            //{
+            //    repositorio.Create();
+            //    repositorio.Retrieve();
+            //    repositorio.Update();
+            //    repositorio.Delete();
+            //    repositorio.Filter();
+            //}
         }
 
         /// <summary>
