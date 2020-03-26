@@ -35,3 +35,6 @@ Consiste en un proyecto de consola y librerias de clase del .net Standard, en el
   <li><b>Numaletra:</b> Convierte cualquier número a su representación en letras.</li>
 </ul>
 <a href="https://github.com/kenllyacosta/Librerias-.NET/blob/master/Metodos_de_extension/Metodos.cs">Listado de métodos agregados</><p/>
+
+<h3>RepositorioEF</h3>
+<p>Consiste en un proyecto de libreria de clases del .Net Framwork para acceder a cualquier fuente de datos usando EntityFramwork o T-SQL</p>
