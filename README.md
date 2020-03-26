@@ -38,3 +38,21 @@ Consiste en un proyecto de consola y librerias de clase del .net Standard, en el
 
 <h3>RepositorioEF</h3>
 <p>Consiste en un proyecto de libreria de clases del .Net Framwork para acceder a cualquier fuente de datos usando EntityFramwork o T-SQL</p>
+<p>Métodos de Repositorio&lt;TEntity&gt;</p>
+<ul>
+  <li><b>Create:</b> Este método crea un registro nuevo en la tabla.</li>
+  <li><b>Retrieve:</b> Este método retorna un listado de registros desde la tabla.</li>
+  <li><b>Update:</b> Este actualiza el registro en la tabla.</li>
+  <li><b>Delete:</b> Este método elimina un registro de la tabla.</li>
+</ul>
+<p>Métodos de Repositorio</p>
+<ul>
+  <li><b>QuerySQL:</b> Este método acepta una sentencia T-SQL para trabajar con bases de datos Microsoft SQL.</li>
+  <li><b>QueryMySQL:</b> Este método acepta una sentencia T-SQL para trabajar con bases de datos MySQL.</li>
+  <li><b>QueryCommonSQL:</b> Este método acepta una sentencia T-SQL para trabajar con bases de datos de otros tipos.</li>
+  <li><b>MakeEntityFromDataTable:</b> Este método convierte desde la consulta T-SQL a su tipo de dato.</li>
+  <li><b>GetProviderFactoryClasses:</b> Este método obtiene todos los proveedores instalados.</li>
+  <li><b>GetConnectionStringByProvider:</b> Este método obtiene la cadena de conexión por cada proveedor de datos.</li>
+</ul>
+<em>Nota: todos poseen un evento Exception que notifica en caso haya pasado algún error en el componente.</em>
+<a href="https://github.com/kenllyacosta/Librerias-.NET/blob/master/RepositorioEF/Repositorio.cs">Listado de métodos agregados</><p/>
