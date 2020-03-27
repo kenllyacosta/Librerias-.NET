@@ -62,7 +62,7 @@ namespace Pruebas
             Console.WriteLine(RepositorioEF.Repositorio.GetConnectionStringByProvider("System.Data.SqlServerCe.4.0"));
             Console.WriteLine(RepositorioEF.Repositorio.GetConnectionStringByProvider("MySql.Data.MySqlClient"));
 
-            //Consulta con T-SQL
+            //Consulta con T-SQL            
             var datosSQL = RepositorioEF.Repositorio.QuerySQL("Select * From NombreTabla", "***Your ConectionString***");
             var datosMySQL = RepositorioEF.Repositorio.QueryMySQL("Select * From NombreTabla", "***Your ConectionString***");
             var datosSQLDataCommon = RepositorioEF.Repositorio.QueryCommonSQL("Select * From NombreTabla", "***Your ConectionString***", "System.Data.SqlClient");

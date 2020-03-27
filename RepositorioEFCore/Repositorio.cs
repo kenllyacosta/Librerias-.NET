@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -7,25 +8,10 @@ using System.Linq;
 
 namespace RepositorioEFCore
 {
-    internal interface IRepositorio : IDisposable
-    {
-        //Operaciones que expondrá la interface
-        TEntity Create<TEntity>(TEntity toCreate) where TEntity : class;
-        TEntity Retrieve<TEntity>(Expression<Func<TEntity, bool>> criterio) where TEntity : class;
-        bool Update<TEntity>(TEntity toUpdate) where TEntity : class;
-        bool Delete<TEntity>(TEntity toDelete) where TEntity : class;
-        List<TEntity> Filter<TEntity>(Expression<Func<TEntity, bool>> criterio, bool asNoTrack) where TEntity : class;
-    }
-
-    internal interface IUnitOfWork : IRepositorio
-    {
-        int Save();
-    }
-
     //Crear delegado para el manejo de las exceptions
     public delegate void ExceptionEventHandler(object sender, ExceptionEvenArgs e);
 
-    public class Repositorio : IRepositorio
+    public class Repositorio
     {
         /// <summary>
         /// Evento para manejo de las excepciones lanzadas desde el repositorio genérico
@@ -62,9 +48,13 @@ namespace RepositorioEFCore
                 Result = Contexto.Set<TEntity>().Add(toCreate).Entity;
                 Save();
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -78,9 +68,13 @@ namespace RepositorioEFCore
                 Save();
                 Result = toCreate;
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -94,9 +88,13 @@ namespace RepositorioEFCore
                 Contexto.Set<TEntity>().Remove(toDelete);
                 Result = Save() > 0;
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -110,6 +108,10 @@ namespace RepositorioEFCore
                 Contexto.Set<TEntity>().RemoveRange(toDelete);
                 Result = Save() > 0;
 
+            }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
             }
             catch (Exception ex)
             {
@@ -127,9 +129,13 @@ namespace RepositorioEFCore
                 Contexto.Entry<TEntity>(toUpdate).State = EntityState.Modified;
                 Result = Save() > 0;
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -142,9 +148,13 @@ namespace RepositorioEFCore
                 Contexto.Entry<TEntity>(Contexto.Set<TEntity>().FirstOrDefault(criterio)).Property(propertyName).CurrentValue = valor;
                 Result = Save() > 0;
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -156,9 +166,13 @@ namespace RepositorioEFCore
             {
                 Result = Contexto.Set<TEntity>().FirstOrDefault(criterio);
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -170,9 +184,13 @@ namespace RepositorioEFCore
             {
                 Result = Contexto.Set<TEntity>().Include(include1).FirstOrDefault(criterio);
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -184,9 +202,13 @@ namespace RepositorioEFCore
             {
                 Result = Contexto.Set<TEntity>().Include(include1).Include(include2).FirstOrDefault(criterio);
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -198,9 +220,13 @@ namespace RepositorioEFCore
             {
                 Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).FirstOrDefault(criterio);
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -212,9 +238,13 @@ namespace RepositorioEFCore
             {
                 Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).FirstOrDefault(criterio);
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -226,9 +256,13 @@ namespace RepositorioEFCore
             {
                 Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).FirstOrDefault(criterio);
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -240,9 +274,13 @@ namespace RepositorioEFCore
             {
                 Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).FirstOrDefault(criterio);
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -254,9 +292,13 @@ namespace RepositorioEFCore
             {
                 Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).FirstOrDefault(criterio);
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -268,9 +310,13 @@ namespace RepositorioEFCore
             {
                 Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).FirstOrDefault(criterio);
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -282,9 +328,13 @@ namespace RepositorioEFCore
             {
                 Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Include(include9).FirstOrDefault(criterio);
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -296,9 +346,13 @@ namespace RepositorioEFCore
             {
                 Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Include(include9).Include(include10).FirstOrDefault(criterio);
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -313,9 +367,13 @@ namespace RepositorioEFCore
                 else
                     Result = Contexto.Set<TEntity>().Where(criterio).ToList();
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -330,9 +388,13 @@ namespace RepositorioEFCore
                 else
                     Result = Contexto.Set<TEntity>().Include(include1).Where(criterio).ToList();
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -347,9 +409,13 @@ namespace RepositorioEFCore
                 else
                     Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Where(criterio).ToList();
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -364,9 +430,13 @@ namespace RepositorioEFCore
                 else
                     Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Where(criterio).ToList();
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -381,9 +451,13 @@ namespace RepositorioEFCore
                 else
                     Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Where(criterio).ToList();
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -398,9 +472,13 @@ namespace RepositorioEFCore
                 else
                     Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Where(criterio).ToList();
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -415,9 +493,13 @@ namespace RepositorioEFCore
                 else
                     Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Where(criterio).ToList();
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -432,9 +514,13 @@ namespace RepositorioEFCore
                 else
                     Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Where(criterio).ToList();
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -449,9 +535,13 @@ namespace RepositorioEFCore
                 else
                     Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Where(criterio).ToList();
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -466,9 +556,13 @@ namespace RepositorioEFCore
                 else
                     Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Include(include9).Where(criterio).ToList();
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -483,9 +577,13 @@ namespace RepositorioEFCore
                 else
                     Result = Contexto.Set<TEntity>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Include(include7).Include(include8).Include(include9).Include(include10).Where(criterio).ToList();
             }
+            catch (DbUpdateException ex)
+            {
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink, Entries = ex.Entries });
+            }
             catch (Exception ex)
             {
-                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, HelpLink = ex.HelpLink });
             }
             return Result;
         }
@@ -517,13 +615,15 @@ namespace RepositorioEFCore
                 return 0;
         }
     }
-
+    
     public class ExceptionEvenArgs : EventArgs
     {
         public string Message { get; set; }
         public string Source { get; set; }
         public string StackTrace { get; set; }
         public MethodBase TargetSite { get; set; }
-        public Exception InnerException { get; set; }        
+        public Exception InnerException { get; set; }
+        public string HelpLink { get; set; }        
+        public IReadOnlyList<EntityEntry> Entries { get; set; }
     }
 }

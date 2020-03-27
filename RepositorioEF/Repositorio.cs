@@ -14,25 +14,10 @@ using System.Reflection;
 
 namespace RepositorioEF
 {
-    internal interface IRepositorio : IDisposable
-    {
-        //Operaciones que expondrá la interface
-        TEntity Create<TEntity>(TEntity toCreate) where TEntity : class;
-        TEntity Retrieve<TEntity>(Expression<Func<TEntity, bool>> criterio) where TEntity : class;
-        bool Update<TEntity>(TEntity toUpdate) where TEntity : class;
-        bool Delete<TEntity>(TEntity toDelete) where TEntity : class;
-        List<TEntity> Filter<TEntity>(Expression<Func<TEntity, bool>> criterio, bool asNoTrack) where TEntity : class;
-    }
-
-    internal interface IUnitOfWork : IRepositorio
-    {        
-        int Save();
-    }
-
     //Crear delegado para el manejo de las excepciones
     public delegate void ExceptionEventHandler(object sender, ExceptionEvenArgs e);
 
-    public class Repositorio : IRepositorio
+    public class Repositorio
     {
         /// <summary>
         /// Evento para manejo de las excepciones lanzadas desde el repositorio genérico
@@ -71,7 +56,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -90,7 +75,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -110,7 +95,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -151,7 +136,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -188,7 +173,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -206,7 +191,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -224,7 +209,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -242,7 +227,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -260,7 +245,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -278,7 +263,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -296,7 +281,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -314,7 +299,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -332,7 +317,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -350,7 +335,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -368,7 +353,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -389,7 +374,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -410,7 +395,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -431,7 +416,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -452,7 +437,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -473,7 +458,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -494,7 +479,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -515,7 +500,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -536,7 +521,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -557,7 +542,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -578,7 +563,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -599,7 +584,7 @@ namespace RepositorioEF
             }
             catch (DbEntityValidationException ex)
             {
-                Excepcion?.Invoke(new object(), new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
+                Excepcion?.Invoke(this, new ExceptionEvenArgs() { Message = ex.Message, InnerException = ex.InnerException, Source = ex.Source, StackTrace = ex.StackTrace, TargetSite = ex.TargetSite, EntityValidationErrors = ex.EntityValidationErrors });
             }
             catch (Exception ex)
             {
@@ -686,14 +671,12 @@ namespace RepositorioEF
                     #region Para uso de los parámetros (opcionales)
                     //Add Parameters
                     if (Parameters != null)
-                    {
                         foreach (var kvp in Parameters)
                         {
                             MySqlParameter parameter = adapter.SelectCommand.CreateParameter();
                             parameter.MySqlDbType = kvp.DbType;
                             adapter.SelectCommand.Parameters.AddWithValue(kvp.Name, kvp.Value);
                         }
-                    }
                     #endregion
 
                     cnn.Open();
@@ -768,7 +751,6 @@ namespace RepositorioEF
                             #region Para uso de los parámetros (opcionales)
                             //Add Parameters
                             if (Parameters != null)
-                            {
                                 foreach (var kvp in Parameters)
                                 {
                                     DbParameter parameter = cmd.CreateParameter();
@@ -777,7 +759,6 @@ namespace RepositorioEF
                                     parameter.DbType = kvp.DbType;
                                     cmd.Parameters.Add(parameter);
                                 }
-                            }
                             #endregion
 
                             conn.Open();
@@ -802,7 +783,6 @@ namespace RepositorioEF
             Type objType = typeof(T);
             List<T> collection = new List<T>();
             if (data != null && data.Rows.Count > 0)
-            {
                 foreach (DataRow row in data.Rows)
                 {
                     // create an instance of our object
@@ -813,7 +793,6 @@ namespace RepositorioEF
 
                     // set the object's properties as they are found.
                     foreach (PropertyInfo property in properties)
-                    {
                         if (data.Columns.Contains(property.Name))
                         {
                             Type pType = property.PropertyType;
@@ -826,10 +805,10 @@ namespace RepositorioEF
                             }
                             catch { }
                         }
-                    }
+
                     collection.Add(item);
                 }
-            }
+
             return collection;
         }
 
@@ -883,14 +862,13 @@ namespace RepositorioEF
             // Walk through the collection and return the first 
             // connection string matching the providerName.
             if (settings != null)
-            {
                 foreach (ConnectionStringSettings cs in settings)
                 {
                     if (cs.ProviderName == providerName)
                         returnValue = cs.ConnectionString;
                     break;
                 }
-            }
+
             return returnValue;
         }
         #endregion
@@ -984,10 +962,10 @@ namespace RepositorioEF
         public DbType DbType { get; set; }
     }
 
-    public static class TypeExtension
+    internal static class TypeExtension
     {
         //a thread-safe way to hold default instances created at run-time
-        private static ConcurrentDictionary<Type, object> typeDefaults = new ConcurrentDictionary<Type, object>();
+        private static readonly ConcurrentDictionary<Type, object> typeDefaults = new ConcurrentDictionary<Type, object>();
 
         public static object GetDefaultValue(this Type type)
         {
