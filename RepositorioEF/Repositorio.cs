@@ -17,7 +17,7 @@ namespace RepositorioEF
     //Crear delegado para el manejo de las excepciones
     public delegate void ExceptionEventHandler(object sender, ExceptionEvenArgs e);
 
-    public class Repositorio
+    public class Repositorio : IDisposable
     {
         /// <summary>
         /// Evento para manejo de las excepciones lanzadas desde el repositorio genérico
